@@ -18,6 +18,7 @@
 
 package org.apache.hadoop.hive.ql;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.hive.conf.HiveConf;
@@ -38,6 +39,11 @@ public class QueryState {
    * type of the command.
    */
   private HiveOperation commandType;
+
+  /**
+   * map of resources involved in the query.
+   */
+  private final Map<String, Object> resourceMap = new HashMap<>();
 
   public QueryState(HiveConf conf) {
     this(conf, null, false);
@@ -108,5 +114,13 @@ public class QueryState {
 
   public HiveConf getConf() {
     return queryConf;
+  }
+
+  public void addResource(String resourceIdentifier, Object resource) {
+    resourceMap.put(resourceIdentifier, resource);
+  }
+
+  public Object getResource(String resourceIdentifier) {
+    return resourceMap.get(resourceIdentifier);
   }
 }

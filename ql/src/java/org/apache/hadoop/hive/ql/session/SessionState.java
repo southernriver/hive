@@ -58,6 +58,7 @@ import org.apache.hadoop.hive.conf.HiveConf.ConfVars;
 import org.apache.hadoop.hive.metastore.ObjectStore;
 import org.apache.hadoop.hive.metastore.api.ColumnStatisticsObj;
 import org.apache.hadoop.hive.ql.MapRedStats;
+import org.apache.hadoop.hive.ql.QueryState;
 import org.apache.hadoop.hive.ql.exec.AddToClassPathAction;
 import org.apache.hadoop.hive.ql.exec.Registry;
 import org.apache.hadoop.hive.ql.exec.Utilities;
@@ -300,6 +301,19 @@ public class SessionState {
     return sessionConf;
   }
 
+  private final Map<String, QueryState> queryStateMap = new HashMap<>();
+
+  public QueryState getQueryState(String queryId) {
+    return queryStateMap.get(queryId);
+  }
+
+  public void addQueryState(String queryId, QueryState queryState) {
+    queryStateMap.put(queryId, queryState);
+  }
+
+  public void removeQueryState(String queryId) {
+    queryStateMap.remove(queryId);
+  }
 
   public File getTmpOutputFile() {
     return tmpOutputFile;

@@ -353,6 +353,9 @@ public class Driver implements CommandProcessor {
     isParallelEnabled = (conf != null)
         && HiveConf.getBoolVar(conf, ConfVars.HIVE_SERVER2_PARALLEL_COMPILATION);
     this.userName = userName;
+    if (SessionState.get() != null) {
+      SessionState.get().addQueryState(conf.get(HiveConf.ConfVars.HIVEQUERYID.varname), queryState);
+    }
   }
 
   /**
