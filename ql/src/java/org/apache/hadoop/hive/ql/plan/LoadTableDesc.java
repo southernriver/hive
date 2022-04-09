@@ -42,6 +42,8 @@ public class LoadTableDesc extends org.apache.hadoop.hive.ql.plan.LoadDesc
   // insert, update, or delete.
   private AcidUtils.Operation writeType;
 
+  private boolean isInsertOverwrite;
+
   // TODO: the below seems like they should just be combined into partitionDesc
   private org.apache.hadoop.hive.ql.plan.TableDesc table;
   private Map<String, String> partitionSpec; // NOTE: this partitionSpec has to be ordered map
@@ -165,6 +167,14 @@ public class LoadTableDesc extends org.apache.hadoop.hive.ql.plan.LoadDesc
 
   public void setInheritTableSpecs(boolean inheritTableSpecs) {
     this.inheritTableSpecs = inheritTableSpecs;
+  }
+
+  public boolean isInsertOverwrite() {
+    return this.isInsertOverwrite;
+  }
+
+  public void setInsertOverwrite(boolean v) {
+    this.isInsertOverwrite = v;
   }
 
   /**

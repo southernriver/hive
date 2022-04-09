@@ -34,6 +34,7 @@ public class LoadFileDesc extends LoadDesc implements Serializable {
   // list of columns, comma separated
   private String columns;
   private String columnTypes;
+  private transient CreateTableDesc ctasCreateTableDesc;
   private String destinationCreateTable;
 
   public LoadFileDesc() {
@@ -58,6 +59,7 @@ public class LoadFileDesc extends LoadDesc implements Serializable {
       destinationCreateTable = (createTableDesc.getTableName().contains(".") ? "" : createTableDesc
           .getDatabaseName() + ".")
           + createTableDesc.getTableName();
+      this.ctasCreateTableDesc = createTableDesc;
     } else if (createViewDesc != null) {
       // The work is already done in analyzeCreateView to assure that the view name is fully
       // qualified.
@@ -128,5 +130,9 @@ public class LoadFileDesc extends LoadDesc implements Serializable {
    */
   public String getDestinationCreateTable(){
     return destinationCreateTable;
+  }
+
+  public CreateTableDesc getCtasCreateTableDesc() {
+    return ctasCreateTableDesc;
   }
 }

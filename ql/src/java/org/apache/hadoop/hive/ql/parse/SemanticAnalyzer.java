@@ -43,6 +43,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import com.google.common.collect.ImmutableMap;
 import org.antlr.runtime.ClassicToken;
 import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
@@ -6866,15 +6867,17 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
 
       // Create the work for moving the table
       // NOTE: specify Dynamic partitions in dest_tab for WriteEntity
-      if (!isNonNativeTable) {
+      if (!isNonNativeTable || dest_tab.getStorageHandler().commitInMoveTask()) {
         AcidUtils.Operation acidOp = AcidUtils.Operation.NOT_ACID;
         if (destTableIsAcid) {
           acidOp = getAcidType(table_desc.getOutputFileFormatClass(), dest);
           checkAcidConstraints(qb, table_desc, dest_tab);
         }
         ltd = new LoadTableDesc(queryTmpdir, table_desc, dpCtx, acidOp);
-        ltd.setReplace(!qb.getParseInfo().isInsertIntoTable(dest_tab.getDbName(),
-            dest_tab.getTableName()));
+        boolean isInsertInto = qb.getParseInfo().isInsertIntoTable(dest_tab.getDbName(),
+            dest_tab.getTableName());
+        ltd.setReplace(!isInsertInto);
+        ltd.setInsertOverwrite(!isInsertInto);
         ltd.setLbCtx(lbCtx);
         loadTableWork.add(ltd);
       } else {
@@ -6885,6 +6888,12 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
         boolean overwrite = !qb.getParseInfo().isInsertIntoTable(
                 String.format("%s.%s", dest_tab.getDbName(), dest_tab.getTableName()));
         createInsertDesc(dest_tab, overwrite);
+        if (partSpec == null) {
+          ltd = new LoadTableDesc(queryTmpdir, table_desc, ImmutableMap.<String, String>of());
+        } else {
+          ltd = new LoadTableDesc(queryTmpdir, table_desc, partSpec);
+        }
+        ltd.setInsertOverwrite(overwrite);
       }
 
       WriteEntity output = null;
@@ -7204,6 +7213,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
       rsCtx.getPartnCols(),
       dpCtx,
       dest_path);
+
 
     boolean isHiveServerQuery = SessionState.get().isHiveServerQuery();
     fileSinkDesc.setHiveServerQuery(isHiveServerQuery);

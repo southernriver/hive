@@ -19,9 +19,11 @@
 package org.apache.hadoop.hive.ql.metadata;
 
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.hive.metastore.HiveMetaHook;
+import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.ql.plan.TableDesc;
 import org.apache.hadoop.hive.serde2.AbstractSerDe;
 import org.apache.hadoop.hive.ql.security.authorization.HiveAuthorizationProvider;
@@ -142,4 +144,25 @@ public interface HiveStorageHandler extends Configurable {
    * @param JobConf jobConf for MapReduce job
    */
   public void configureJobConf(TableDesc tableDesc, JobConf jobConf);
+
+  /**
+   * Checks if we should keep the {@link org.apache.hadoop.hive.ql.exec.MoveTask} and use the
+   * {@link #storageHandlerCommit(Properties, boolean)} method for committing inserts instead of
+   * {@link org.apache.hadoop.hive.metastore.DefaultHiveMetaHook#commitInsertTable(Table, boolean)}.
+   * @return Returns true if we should use the {@link #storageHandlerCommit(Properties, boolean)} method
+   */
+  default boolean commitInMoveTask() {
+    return false;
+  }
+
+  /**
+   * Commits the inserts for the non-native tables. Used in the {@link org.apache.hadoop.hive.ql.exec.MoveTask}.
+   * @param commitProperties Commit properties which are needed for the handler based commit
+   * @param overwrite If this is an INSERT OVERWRITE then it is true
+   * @throws HiveException If there is an error during commit
+   */
+  default void storageHandlerCommit(Properties commitProperties, boolean overwrite) throws HiveException {
+    throw new UnsupportedOperationException();
+  }
+
 }

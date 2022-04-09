@@ -103,6 +103,8 @@ public class FileSinkDesc extends AbstractOperatorDesc {
    */
   private boolean isUsingThriftJDBCBinarySerDe = false;
 
+  private boolean isInsertOverwrite = false;
+
   public FileSinkDesc() {
   }
 
@@ -509,4 +511,13 @@ public class FileSinkDesc extends AbstractOperatorDesc {
     }
     return new FileSinkOperatorExplainVectorization(vectorDesc);
   }
+
+  public void setInsertOverwrite(boolean isInsertOverwrite) {
+    this.isInsertOverwrite = isInsertOverwrite;
+  }
+
+  public boolean getInsertOverwrite() {
+    return isInsertOverwrite;
+  }
+
 }
