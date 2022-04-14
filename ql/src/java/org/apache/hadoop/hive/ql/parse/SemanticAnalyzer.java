@@ -6884,6 +6884,9 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
         // true if it is insert overwrite.
         boolean overwrite = !qb.getParseInfo().isInsertIntoTable(
                 String.format("%s.%s", dest_tab.getDbName(), dest_tab.getTableName()));
+        if (overwrite) {
+          ctx.setCmd("set iceberg.mr.write.is.overwrite = true");
+        }
         createInsertDesc(dest_tab, overwrite);
       }
 
