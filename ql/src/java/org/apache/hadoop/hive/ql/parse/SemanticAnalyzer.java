@@ -263,6 +263,8 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
 
   static final String MATERIALIZATION_MARKER = "$MATERIALIZATION";
 
+  public static final String ICEBERG_MR_OVERWRITE_TABLE_LIST = "iceberg.mr.overwrite.table.list";
+
   private HashMap<TableScanOperator, ExprNodeDesc> opToPartPruner;
   private HashMap<TableScanOperator, PrunedPartitionList> opToPartList;
   protected HashMap<String, TableScanOperator> topOps;
@@ -6882,10 +6884,12 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
         // We need to set stats as inaccurate.
         setStatsForNonNativeTable(dest_tab);
         // true if it is insert overwrite.
-        boolean overwrite = !qb.getParseInfo().isInsertIntoTable(
-                String.format("%s.%s", dest_tab.getDbName(), dest_tab.getTableName()));
+        String table = String.format("%s.%s", dest_tab.getDbName(), dest_tab.getTableName());
+        boolean overwrite = !qb.getParseInfo().isInsertIntoTable(table);
         if (overwrite) {
-          ctx.setCmd("set iceberg.mr.write.is.overwrite = true");
+          String overwriteTableNames = ctx.getConf().get(ICEBERG_MR_OVERWRITE_TABLE_LIST,null);
+          ctx.getConf().setStrings(ICEBERG_MR_OVERWRITE_TABLE_LIST, overwriteTableNames == null ?
+              table : overwriteTableNames + "," + table);
         }
         createInsertDesc(dest_tab, overwrite);
       }
